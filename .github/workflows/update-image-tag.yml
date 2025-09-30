@@ -30,7 +30,7 @@ jobs:
       - name: Update image tag
         run: |
           echo "Updating project ${{ github.event.client_payload.project_name }} to tag ${{ github.event.client_payload.image_tag }}"
-          sed -i "s|^${{ github.event.client_payload.project_name }}_docker_version:.*|${{ github.event.client_payload.project_name }}_docker_version: ${{ github.event.inputs.image_tag }}|" provisioning/inventory/group_vars/dev/containers.yml
+          sed -i "s|^${{ github.event.client_payload.project_name }}_docker_version:.*|${{ github.event.client_payload.project_name }}_docker_version: ${{ github.event.client_payload.image_tag }}|" provisioning/inventory/group_vars/dev/containers.yml
 
       # Commit & push changes
       - name: Commit changes
