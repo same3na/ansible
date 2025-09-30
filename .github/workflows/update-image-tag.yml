@@ -1,16 +1,8 @@
 name: update-image-tag
 
 on:
-  workflow_dispatch:
-    inputs:
-      project_name:
-        description: 'The project name (e.g., frontend, backend)'
-        required: true
-        type: string
-      image_tag:
-        description: 'The new image tag to update'
-        required: true
-        type: string
+  repository_dispatch:
+    types: [update-image-tag]
 
 concurrency:
   group: "infra-tag-update"
@@ -29,16 +21,16 @@ jobs:
       # Validate inputs
       - name: Validate project_name exists
         run: |
-          if ! grep -q "^${{ github.event.inputs.project_name }}_docker_version:" provisioning/inventory/group_vars/dev/containers.yml; then
-            echo "Project ${{ github.event.inputs.project_name }} not found in containers.yml"
+          if ! grep -q "^${{ github.event.client_payload.project_name }}_docker_version:" provisioning/inventory/group_vars/dev/containers.yml; then
+            echo "Project ${{ github.event.client_payload.project_name }} not found in containers.yml"
             exit 1
           fi
 
       # Update the image tag in the YAML file
       - name: Update image tag
         run: |
-          echo "Updating project ${{ github.event.inputs.project_name }} to tag ${{ github.event.inputs.image_tag }}"
-          sed -i "s|^${{ github.event.inputs.project_name }}_docker_version:.*|${{ github.event.inputs.project_name }}_docker_version: ${{ github.event.inputs.image_tag }}|" provisioning/inventory/group_vars/dev/containers.yml
+          echo "Updating project ${{ github.event.client_payload.project_name }} to tag ${{ github.event.client_payload.image_tag }}"
+          sed -i "s|^${{ github.event.client_payload.project_name }}_docker_version:.*|${{ github.event.client_payload.project_name }}_docker_version: ${{ github.event.inputs.image_tag }}|" provisioning/inventory/group_vars/dev/containers.yml
 
       # Commit & push changes
       - name: Commit changes
@@ -46,6 +38,6 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add vars/images.yaml
-          git commit -m "Update ${{ github.event.inputs.project_name }} image tag to ${{ github.event.inputs.image_tag }}" || echo "No changes to commit"
+          git commit -m "Update ${{ github.event.client_payload.project_name }} image tag to ${{ github.event.client_payload.image_tag }}" || echo "No changes to commit"
           git push
 
