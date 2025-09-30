@@ -95,11 +95,11 @@ services:
       - "{{ansible_env.HOME}}/config/monitoring-logging/grafana-loki.yaml:/etc/grafana/provisioning/datasources/loki.yaml"
 
 
-backend_docker_version: "release-a1bdb90"
-swager_api_docker_version: "release-a1bdb90"
-feature_app_docker_version: "release-0124594"
-feature_app_server_docker_version: "release-0124594"
-migrate_docker_version: "release-a1bdb90"
+backend_docker_version: release-a1bdb90
+swager_api_docker_version: release-a1bdb90
+feature_app_docker_version: release-0124594
+feature_app_server_docker_version: release-0124594
+migrate_docker_version: release-a1bdb90
 frontend_docker_version: release-e66d611
 
 
