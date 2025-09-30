@@ -1,4 +1,4 @@
-name: Update Image Tag
+name: update-image-tag
 
 on:
   workflow_dispatch:
@@ -48,3 +48,4 @@ jobs:
           git add vars/images.yaml
           git commit -m "Update ${{ github.event.inputs.project_name }} image tag to ${{ github.event.inputs.image_tag }}" || echo "No changes to commit"
           git push
+
