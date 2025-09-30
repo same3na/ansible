@@ -1,0 +1,36 @@
+[Unit]
+Description={{ item.name }} container
+
+[Container]
+ContainerName={{ item.name }}
+Image={{ item.image }}
+{% if item.ports is defined %}
+{% for port in item.ports %}
+PublishPort={{ port }}
+{% endfor %}
+{% endif %}
+{% if item.volumes is defined %}
+{% for volume in item.volumes %}
+Volume={{ volume }}
+{% endfor %}
+{% endif %}
+Network={{ docker_network_name }}
+{% if item.env is defined %}
+{% for key, value in item.env.items() %}
+Environment={{ key }}={{ value }}
+{% endfor %}
+{% endif %}
+{% if item.restart_policy is defined %}
+RestartPolicy={{ item.restart_policy }}
+{% endif %}
+{% if item.command is defined %}
+Exec={{ item.command | join(' ')}}
+{% endif %}
+{% if item.labels is defined %}
+{% for key, value in item.labels.items() %}
+Label={{ key }}={{ value }}
+{% endfor %}
+{% endif %}
+
+[Install]
+WantedBy=default.target

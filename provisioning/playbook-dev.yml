@@ -1,0 +1,10 @@
+---
+- hosts: dev
+  roles:
+    - role: podman
+      tags: [ 'podman' ]
+    - role: ansible-role-postgresql
+      tags: [ 'postgres' ]
+      become: true
+    - role: containers
+      tags: [ 'containers' ]

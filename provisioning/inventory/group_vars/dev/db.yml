@@ -1,0 +1,41 @@
+##########
+## DB vars
+##########
+
+postgresql_global_config_options:
+  - option: unix_socket_directories
+    value: '{{ postgresql_unix_socket_directories | join(",") }}'
+  - option: log_directory
+    value: 'log'
+  # added. So that we can connect from docker to postgres
+  - option: listen_addresses
+    value: "0.0.0.0"
+
+postgresql_hba_entries:
+  - {type: host, database: same3na, user: same3nauser, address: "37.60.252.188/32", auth_method: md5}
+  - {type: local, database: same3na, user: same3nauser, auth_method: md5}
+  - {type: local, database: all, user: postgres, auth_method: peer}
+  - {type: local, database: all, user: all, auth_method: peer}
+  - {type: host, database: all, user: all, address: '127.0.0.1/32', auth_method: "{{ postgresql_auth_method }}"}
+  - {type: host, database: all, user: all, address: '::1/128', auth_method: "{{ postgresql_auth_method }}"}
+
+# login_host, login_password, login_user. They don’t define who owns the database — instead, they tell Ansible how to connect to PostgreSQL when running the task. 
+postgresql_databases: 
+  - name: same3na # required; the rest are optional
+    owner: same3nauser
+    state: present
+
+# Users to ensure exist.
+postgresql_users:
+  - name: same3nauser #required; the rest are optional
+    password: "{{ vault.db.same3na_password }}"
+    db: same3na
+    state: present
+
+postgres_users_no_log: true
+
+postgresql_privs:
+  - db: same3na # database (required)
+    type: database
+    roles: same3nauser  # role(s) the privs apply to (required)
+    privs: 'ALL' # comma separated list of privileges - defaults to not set

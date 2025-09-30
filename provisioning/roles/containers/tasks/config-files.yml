@@ -1,0 +1,41 @@
+---
+- name: Ensure config dir exists
+  file:
+    path: "{{item}}"
+    state: directory
+    mode: '0755'
+    owner: "{{ansible_user_id}}"
+    group: "{{ansible_user_gid}}"
+  loop: 
+    - "{{ansible_env.HOME}}/config/redis"
+    - "{{ansible_env.HOME}}/config/monitoring-logging"
+
+
+# adding the redis lua script
+- name: Deploy redis lua script
+  template:
+    src: redis-lua-pending-messages.lua.j2
+    dest: "{{ansible_env.HOME}}/config/redis/redis-lua-pending-messages.lua"
+  notify: Restart RedisExporter
+
+  # adding the templates for grafana and loki
+- name: Deploy loki config file
+  template:
+    src: loki-config.yaml.j2
+    dest: "{{ansible_env.HOME}}/config/monitoring-logging/loki-config.yaml"
+
+- name: Deploy promtail config file
+  template:
+    src: promtail-config.yaml.j2
+    dest: "{{ansible_env.HOME}}/config/monitoring-logging/promtail-config.yaml"
+  notify: Restart Promtail
+
+- name: Deploy prometheus data source
+  template:
+    src: prometheus.yaml.j2 
+    dest: "{{ansible_env.HOME}}/config/monitoring-logging/prometheus.yaml"
+
+- name: Deploy grafana data source
+  template:
+    src: grafana-loki.yaml.j2 
+    dest: "{{ansible_env.HOME}}/config/monitoring-logging/grafana-loki.yaml"

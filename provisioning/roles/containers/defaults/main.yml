@@ -1,0 +1,6 @@
+---
+
+docker_host: "unix:///run/user/{{ ansible_user_uid }}/podman/podman.sock"
+services_volumes: []
+services: []
+sites: []

@@ -1,0 +1,4 @@
+base_url: same3na.com
+
+podman_host_ip: 10.89.0.1
+podman_host_subnet: 10.89.0.0/24

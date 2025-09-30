@@ -1,0 +1,186 @@
+---
+
+docker_network_name: same3na_same3na-network
+
+services_volumes:
+  - name: same3na_redis_data
+  - name: same3na_traefik_letsencrypt
+
+services:
+  - name: traefik
+    image: traefik:v2.10
+    command:
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.myresolver.acme.email=namirabboud@gmail.com"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.traefik.rule: "Host(`traefik.{{ base_url }}`)"
+      traefik.http.routers.traefik.entrypoints: "websecure"
+      traefik.http.routers.traefik.service: "api@internal"
+      traefik.http.routers.traefik.tls.certresolver: "myresolver"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /run/user/{{ ansible_user_uid }}/podman/podman.sock:/var/run/docker.sock:ro
+      - same3na_traefik_letsencrypt:/letsencrypt
+
+  - name: redis
+    image: redis:7
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - same3na_redis_data:/data
+
+  - name: redis-exporter
+    image: oliver006/redis_exporter:v1.77.0
+    env:
+      REDIS_ADDR: "redis:6379"
+      REDIS_EXPORTER_CHECK_KEYS: "db0=song-added,db0=get-song-data,db0=get-song-features"
+      REDIS_EXPORTER_SCRIPT: "/redis-lua-pending-messages.lua"
+    volumes:
+      - "{{ansible_env.HOME}}/config/redis/redis-lua-pending-messages.lua:/redis-lua-pending-messages.lua"
+  
+  - name: loki
+    image: grafana/loki:3.4.6
+    command: 
+      - "-config.file=/etc/loki/local-config.yaml"
+    volumes:
+      - "{{ansible_env.HOME}}/config/monitoring-logging/loki-config.yaml:/etc/loki/local-config.yaml"
+    ports:
+      - "3100:3100"
+
+  - name: promtail
+    image: grafana/promtail:3.4.6
+    command: 
+      - "-config.file=/etc/promtail/config.yaml"
+    volumes:
+      - /var/log:/var/log
+      - "{{ansible_env.HOME}}/config/monitoring-logging/promtail-config.yaml:/etc/promtail/config.yaml"
+    networks:
+      - name: "{{ docker_network_name }}"
+
+  - name: prometheus
+    image: prom/prometheus:v3.5.0
+    volumes:
+      - "{{ansible_env.HOME}}/config/monitoring-logging/prometheus.yaml:/etc/prometheus/prometheus.yml"
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.prometheus.rule: "Host(`prometheus.{{ base_url }}`)"
+      traefik.http.routers.prometheus.entrypoints: "websecure"
+      traefik.http.services.prometheus.loadbalancer.server.port: "9090"
+      traefik.http.routers.prometheus.tls.certresolver: "myresolver"
+
+  - name: grafana
+    image: grafana/grafana:main
+    labels:
+      traefik.enable: true"
+      traefik.http.routers.grafana.rule: "Host(`grafana.{{ base_url }}`)"
+      traefik.http.services.grafana.loadbalancer.server.port: "3000"
+      traefik.http.routers.grafana.entrypoints: "websecure"
+      traefik.http.routers.grafana.tls.certresolver: "myresolver"
+    env:
+      GF_PATHS_PROVISIONING: /etc/grafana/provisioning
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: "Admin"
+      GF_FEATURE_TOGGLES_ENABLE: "alertingSimplifiedRouting,alertingQueryAndExpressionsStepMode"
+    volumes:
+      - "{{ansible_env.HOME}}/config/monitoring-logging/grafana-loki.yaml:/etc/grafana/provisioning/datasources/loki.yaml"
+
+
+backend_docker_version: "release-a1bdb90"
+swager_api_docker_version: "release-a1bdb90"
+feature_app_docker_version: "release-0124594"
+feature_app_server_docker_version: "release-0124594"
+migrate_docker_version: "release-a1bdb90"
+frontend_docker_version: "release-6066f96"
+
+
+sites:
+  - name: backend
+    image: ghcr.io/same3na/backend:{{ backend_docker_version }}
+    env:
+      PORT: "8000"
+      BASE_URL: "http://backend-app:8000"
+      REDIS_HOST: "redis"
+      REDIS_PORT: "6379"
+      DBHOST: "host.containers.internal"
+      DBPORT: "5432"
+      DBNAME: "same3na"
+      DBUSER: "same3nauser"
+      DBPASS: "{{ vault.db.same3na_password }}"
+      SSLMODE: "disable"
+      ALLOWED_ORIGINS: "*"
+      FEATURES_SERVER_URL: "http://features-app-server:8881"
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.backend.rule: "Host(`api.{{ base_url }}`)"
+      traefik.http.services.backend.loadbalancer.server.port: "8000"
+      traefik.http.routers.backend.entrypoints: "websecure"
+      traefik.http.routers.backend.tls.certresolver: "myresolver"
+
+  - name: swagger-api
+    image: ghcr.io/same3na/backend-swagger:{{ swager_api_docker_version }}
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.backend-swagger.rule: "Host(`swagger.{{ base_url }}`)"
+      traefik.http.services.backend-swagger.loadbalancer.server.port: "8080"
+      traefik.http.routers.backend-swagger.entrypoints: "websecure"
+      traefik.http.routers.backend-swagger.tls.certresolver: "myresolver"
+  
+  - name: features-app-server
+    image: ghcr.io/same3na/features-app-server:{{ feature_app_server_docker_version }}
+    env:
+      DBUSER: "same3nauser"
+      DBNAME: "same3na"
+      DBPASS: "{{ vault.db.same3na_password }}"
+      REDIS_HOST: "redis"
+      REDIS_PORT: "6379"
+      PYTHONPATH: "src"
+      DBPORT: "5432"
+      REDIS_DB: "0"
+      DBHOST: "host.containers.internal"
+      SSLMODE: "disable"
+    volumes:
+      - /home/same3na/youtube_cookies.txt:/app/src/cookies.txt
+
+  - name: features-app
+    image: ghcr.io/same3na/features-app:{{ feature_app_docker_version }}
+    env:
+      DBUSER: "same3nauser"
+      DBNAME: "same3na"
+      DBPASS: "{{ vault.db.same3na_password }}"
+      REDIS_HOST: "redis"
+      REDIS_PORT: "6379"
+      PYTHONPATH: "src"
+      DBPORT: "5432"
+      REDIS_DB: "0"
+      DBHOST: "host.containers.internal"
+      SSLMODE: "disable"
+    volumes:
+      - /home/same3na/youtube_cookies.txt:/app/src/cookies.txt
+      
+  - name: frontend
+    image: ghcr.io/same3na/spa:{{ frontend_docker_version }}
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.frontend.rule: "Host(`{{ base_url }}`)"
+      traefik.http.services.frontend.loadbalancer.server.port: "80"
+      traefik.http.routers.frontend.entrypoints: "websecure"
+      traefik.http.routers.frontend.tls.certresolver: "myresolver"
+
+  # - name: migrate
+  #   image: ghcr.io/same3na/migrations:{{ migrate_docker_version }}
+  #   command: ["./wait-for-it.sh", "host.containers.internal:5432", "--", "alembic", "upgrade", "head"]
+  #   env:
+  #     DB_HOST: "host.containers.internal"
+  #     DB_NAME: "same3na"
+  #     DB_USER: "same3nauser"
+  #     DB_PASS: "{{ vault.db.same3na_password }}"

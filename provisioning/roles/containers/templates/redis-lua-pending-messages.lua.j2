@@ -1,0 +1,26 @@
+-- Statically defined streams and consumer groups
+local monitored_streams = {
+  {stream = "song-added", group = "song-added-grp"},
+  {stream = "get-song-data", group = "get-song-data-grp"},
+  {stream = "get-song-features", group = "get-song-features-grp"}
+}
+
+local results = {}
+
+for _, sg in ipairs(monitored_streams) do
+  local pending = 0
+  local ok, res = pcall(function()
+    return redis.call("XPENDING", sg.stream, sg.group)
+  end)
+
+  if ok and res then
+    pending = res[1] or 0
+  end
+
+  -- Must return as key/value pairs
+  table.insert(results, "stream="..sg.stream..",group="..sg.group)
+  table.insert(results, tostring(pending))
+
+end
+
+return results

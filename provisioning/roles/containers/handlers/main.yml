@@ -1,0 +1,18 @@
+---
+
+- name: Restart RedisExporter
+  ansible.builtin.systemd:
+    name: container.redis-exporter.service
+    state: restarted
+    scope: user
+
+- name: Restart Promtail
+  ansible.builtin.systemd:
+    name: container.promtail.service
+    state: restarted
+    scope: user
+
+- name: Reload Systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+    scope: user

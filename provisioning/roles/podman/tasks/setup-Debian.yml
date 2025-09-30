@@ -1,0 +1,35 @@
+---
+
+- name: Install Podman packages.
+  package:
+    name: "{{ podman_packages }}"
+    state: present
+  become: true
+
+- name: Enable Podman socket for user
+  ansible.builtin.systemd:
+    name: podman.socket
+    scope: user
+    enabled: yes
+    state: started
+
+- name: Ensure DOCKER_HOST env var is set for user
+  ansible.builtin.lineinfile:
+    path: "{{ ansible_env.HOME }}/.bashrc"
+    line: 'export DOCKER_HOST=unix:///run/user/$UID/podman/podman.sock'
+    state: present
+  become: false
+
+- name: Reload .bashrc
+  ansible.builtin.shell: source {{ ansible_env.HOME }}/.bashrc
+  args:
+    executable: /bin/bash
+  become: false
+
+- name: Check Podman installation
+  ansible.builtin.command: podman --version
+  register: podman_version
+
+- name: Show Podman version
+  ansible.builtin.debug:
+    msg: "{{ podman_version.stdout }}"
