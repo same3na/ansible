@@ -1,4 +1,10 @@
-name: update-image-tag
+# Workflow: update-image-tag
+# Trigger: repository_dispatch with type 'update-image-tag'
+# Required inputs in client_payload:
+#   - project_name: name of the project in containers.yml
+#   - image_tag: new docker image tag to set
+
+name: repository-dispatch-update-image-tag
 
 on:
   repository_dispatch:

@@ -39,3 +39,9 @@
     state: present
     reload: yes
   become: true
+
+- name: Enable lingering for the current user
+  become: true
+  ansible.builtin.command:
+    cmd: "loginctl enable-linger {{ ansible_user }}"
+  when: enable_linger

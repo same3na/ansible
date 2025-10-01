@@ -3,3 +3,5 @@
 podman_packages:
   - podman
   - podman-docker
+
+enable_linger: true

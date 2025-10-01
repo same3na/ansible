@@ -1,0 +1,32 @@
+name: workflow-dispatch-playbook-run
+
+on:
+  workflow_dispatch:
+    inputs:
+      role_tag:
+        description: 'The ansible playbook tag to run'
+        required: true
+        type: string
+
+jobs:
+  run-playbook:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the infra repo itself
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Install Ansible
+        run: |
+          sudo apt update
+          sudo apt install -y ansible
+
+      - name: Create vault password file
+        run: echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > vault_pass.pass
+
+      # Run the ansible playbook with the specified tag
+      - name: Run Ansible Playbook
+        run: |
+          ansible-playbook provisioning/playbook-dev.yml \
+            --tags "${{ github.event.inputs.tag }}" \
+            --vault-password-file vault_pass.pass
