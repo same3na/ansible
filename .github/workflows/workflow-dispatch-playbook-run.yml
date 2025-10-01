@@ -31,7 +31,6 @@ jobs:
       # Run the ansible playbook with the specified tag
       - name: Run Ansible Playbook
         run: |
-          ansible-playbook -i provisioning/inventory/ \ 
-            provisioning/playbook-dev.yml \
-            --tags "${{ github.event.inputs.tag }}" \
-            --vault-password-file vault_pass.pass
+          ansible-playbook -i provisioning/inventory/ provisioning/playbook-dev.yml \
+          --tags "${{ github.event.inputs.role_tag }}" \
+          --vault-password-file vault_pass.pass
