@@ -24,6 +24,7 @@ jobs:
         uses: hashicorp/vault-action@v2 # Use the latest stable version
         with:
           method: jwt
+          audience: vault
           url: https://vault.same3na.com
           role: github-infra-role 
           secrets: |
