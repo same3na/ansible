@@ -1,0 +1,38 @@
+---
+
+- name: Ensure config dir exists
+  file:
+    path: "{{item}}"
+    state: directory
+    mode: '0755'
+    owner: "{{ansible_user_id}}"
+    group: "{{ansible_user_gid}}"
+  loop: 
+    - "{{ansible_env.HOME}}/config/vault/config"
+    - "{{ansible_env.HOME}}/config/vault/policies"
+    - "{{ansible_env.HOME}}/config/vault/vault_data"
+  become: true
+
+
+# add the conf file
+# vault config files
+- name: Add the vault.json to remote
+  ansible.builtin.template:
+    src: vault.json.j2
+    dest: "{{ansible_env.HOME}}/config/vault/config/vault.json"
+  notify: Restart Vault
+
+
+# add the policy
+- name: Add the policy
+  ansible.builtin.template:
+    src: "github-infra-policy.hcl.j2"
+    dest: "{{ansible_env.HOME}}/config/vault/policies/github-infra-policy.hcl"
+  notify: Restart Vault
+
+# add the roles
+- name: Add the roles
+  ansible.builtin.template:
+    src: "github-infra-role.json.j2"
+    dest: "{{ansible_env.HOME}}/config/vault/policies/github-infra-role.json"
+  notify: Restart Vault

@@ -1,0 +1,27 @@
+---
+
+# include the config files
+- include_tasks: config-files.yml
+
+# create docker network if not exists
+- name: Create Docker network
+  community.docker.docker_network:
+    name: "{{ docker_network_name }}"
+    state: present
+    docker_host: "{{ docker_host }}"
+
+# adding volumes for services
+- name: create volumes
+  community.docker.docker_volume:
+    name: "{{ item.name }}"
+    state: present
+    driver: "{{ item.driver | default(omit) }}"
+    driver_options: "{{ item.driver_options | default(omit) }}"
+    docker_host: "{{ docker_host }}"
+  loop: "{{ services_volumes | default([]) }}"
+
+- name: Create podman containers for services
+  include_role:
+    name: podman_container
+  vars:
+    podman_containers: "{{ services }}"

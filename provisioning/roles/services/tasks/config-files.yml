@@ -10,7 +10,6 @@
     - "{{ansible_env.HOME}}/config/redis"
     - "{{ansible_env.HOME}}/config/monitoring-logging"
 
-
 # adding the redis lua script
 - name: Deploy redis lua script
   template:

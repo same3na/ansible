@@ -1,0 +1,7 @@
+---
+
+- name: Restart Vault
+  ansible.builtin.systemd:
+    name: container.vault.service
+    state: restarted
+    scope: user

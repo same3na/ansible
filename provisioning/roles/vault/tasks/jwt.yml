@@ -1,0 +1,44 @@
+---
+
+# vault login
+- name: "vault login"
+  community.docker.docker_container_exec:
+    container: "{{ vault_container_name }}"
+    command: "vault login {{ hashi_vault_token }}"
+    docker_host: "{{ docker_host }}"
+  tags: ["vault-jwt-gitlab"]
+
+# enable JWT auth
+- name: "adding JWT auth to vault"
+  community.docker.docker_container_exec:
+    container: "{{ vault_container_name }}"
+    command: "vault auth enable jwt"
+    docker_host: "{{ docker_host }}"
+  tags: ["vault-jwt-gitlab"]
+  ignore_errors: true 
+
+# confiduring the JWT
+- name: Configure JWT
+  community.docker.docker_container_exec:
+    container: "{{ vault_container_name }}"
+    command: "vault write auth/jwt/config oidc_discovery_url=\"{{ vault_jwt_config.oidc_discovery_url }}\" bound_issuer=\"{{ vault_jwt_config.bound_issuer }}\""
+    docker_host: "{{ docker_host }}"
+  tags: ["vault-jwt-gitlab"]
+
+# Create the policies that allow you to read
+- name: "adding policies" 
+  community.docker.docker_container_exec:
+    container: "{{ vault_container_name }}"
+    command: "vault policy write github-infra-policy /vault/policies/github-infra-policy.hcl"
+    docker_host: "{{ docker_host }}"
+  tags: ["vault-jwt-gitlab"]
+  ignore_errors: true
+
+# Create the roles
+- name: "adding roles" 
+  community.docker.docker_container_exec:
+    container: "{{ vault_container_name }}"
+    command: "vault write auth/jwt/role/github-infra-role @/vault/policies/github-infra-role.json"
+    docker_host: "{{ docker_host }}"
+  tags: ["vault-jwt-gitlab"]
+  ignore_errors: true

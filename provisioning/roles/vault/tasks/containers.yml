@@ -1,0 +1,16 @@
+---
+
+- name: "Create required docker volumes for vault"
+  community.docker.docker_volume:
+    name: "{{ item }}"
+    docker_host: "{{ docker_host }}"
+  tags: ["vault"]
+  loop: "{{ vault_docker_volumes }}"
+
+- name: Create podman containers for vault
+  include_role:
+    name: podman_container
+  vars:
+    podman_containers: "{{ vault_containers }}"
+  tags: ["vault"]
+  

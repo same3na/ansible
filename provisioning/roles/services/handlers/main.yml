@@ -11,8 +11,3 @@
     name: container.promtail.service
     state: restarted
     scope: user
-
-- name: Reload Systemd
-  ansible.builtin.systemd:
-    daemon_reload: true
-    scope: user

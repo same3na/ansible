@@ -1,0 +1,24 @@
+---
+
+hashi_vault_token: "{{ vault.hashi_vault_token }}"
+
+vault_containers:
+  - name: vault
+    image: docker.io/vault:1.13.3
+    command: [ "vault", "server", "-config=/vault/config/vault.json" ]
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.vault.rule: "Host(`vault.{{ base_url }}`)"
+      traefik.http.routers.vault.entrypoints: "websecure"
+      traefik.http.routers.vault.tls.certresolver: "myresolver"
+      traefik.http.services.vault.loadbalancer.server.port: "8200"
+
+    volumes:
+      - "{{ansible_env.HOME}}/config/vault/config:/vault/config"
+      - "{{ansible_env.HOME}}/config/vault/policies:/vault/policies"
+      - "vault_data:/vault/file"
+    env:
+      VAULT_ADDR: "https://vault.{{ base_url }}"
+      VAULT_API_ADDR: "https://vault.{{ base_url }}"
+      VAULT_ADDRESS: "https://vault.{{ base_url }}"
+

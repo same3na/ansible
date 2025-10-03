@@ -1,4 +1,4 @@
 base_url: same3na.com
 
-podman_host_ip: 10.89.0.1
-podman_host_subnet: 10.89.0.0/24
+docker_host: "unix:///run/user/{{ ansible_user_uid }}/podman/podman.sock"
+docker_network_name: same3na_same3na-network

@@ -16,21 +16,34 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
-      - name: Install Ansible
-        run: |
-          sudo apt update
-          sudo apt install -y ansible
+      - name: Retrieve secret from Vault
+        uses: hashicorp/vault-action@v2 # Use the latest stable version
+        with:
+          method: jwt
+          url: https://vault.same3na.com
+          role: github-infra-role 
+          secrets: |
+            kv/same3na/infra/server/dev SERVER_PRIVATE_KEY | MY_SECRET_ENV_VAR
 
-      - name: Install dependencies
+      - name: Use secret from Vault
         run: |
-          ansible-galaxy collection install -r ./requirements.yml
+          echo "My secret: ${{ env.MY_SECRET_ENV_VAR }}"
 
-      - name: Create vault password file
-        run: echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > vault_pass.pass
+      # - name: Install Ansible
+      #   run: |
+      #     sudo apt update
+      #     sudo apt install -y ansible
 
-      # Run the ansible playbook with the specified tag
-      - name: Run Ansible Playbook
-        run: |
-          ansible-playbook -i provisioning/inventory/ provisioning/playbook-dev.yml \
-          --tags "${{ github.event.inputs.role_tag }}" \
-          --vault-password-file vault_pass.pass
+      # - name: Install dependencies
+      #   run: |
+      #     ansible-galaxy collection install -r ./requirements.yml
+
+      # - name: Create vault password file
+      #   run: echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > vault_pass.pass
+
+      # # Run the ansible playbook with the specified tag
+      # - name: Run Ansible Playbook
+      #   run: |
+      #     ansible-playbook -i provisioning/inventory/ provisioning/playbook-dev.yml \
+      #     --tags "${{ github.event.inputs.role_tag }}" \
+      #     --vault-password-file vault_pass.pass

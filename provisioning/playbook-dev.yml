@@ -6,5 +6,9 @@
     - role: ansible-role-postgresql
       tags: [ 'postgres' ]
       become: true
-    - role: containers
-      tags: [ 'containers' ]
+    - role: services
+      tags: [ 'services' ]
+    - role: sites
+      tags: [ 'sites' ]
+    - role: vault
+      tags: [ 'vault', 'vault-jwt-gitlab' ]

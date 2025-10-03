@@ -1,0 +1,19 @@
+---
+
+- name: "Deploy Quadlet container units"
+  ansible.builtin.template:
+    src: container.container.j2
+    dest: "{{ ansible_env.HOME }}/.config/containers/systemd/container.{{ item.name }}.container"
+    mode: "0644"
+  notify: Reload Systemd
+  loop: "{{ podman_containers }}"
+
+- meta: flush_handlers  # <- forces the "Reload Systemd" handler to run immediately
+
+- name: "Enable and start containers systemd service"
+  ansible.builtin.systemd:
+    name: "container.{{ item.name }}.service"
+    scope: user
+    enabled: true
+    state: started
+  loop: "{{ podman_containers }}"

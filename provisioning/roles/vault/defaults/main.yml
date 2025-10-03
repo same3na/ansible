@@ -1,0 +1,17 @@
+---
+
+vault_container_name: vault
+vault_url: "https://vault.{{ base_url }}"
+vault_exposed_port: 8200
+
+vault_docker_volumes:
+  - vault_data
+
+vault_containers: []
+
+vault_jwt_config:
+  # jwks_url: https://gitlab.hibridmedia.dev/-/jwks
+  oidc_discovery_url: https://token.actions.githubusercontent.com
+  bound_issuer: https://token.actions.githubusercontent.com
+
+hashi_vault_token: "s.xxxxxxx"  # replace with your actual token or use vault to fetch it securely

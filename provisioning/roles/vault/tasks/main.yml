@@ -1,0 +1,9 @@
+---
+
+- include_tasks: configuration.yml
+
+- include_tasks: containers.yml
+  when: "'vault-jwt-gitlab' not in ansible_run_tags"
+
+- include_tasks: jwt.yml
+  when: "'vault-jwt-gitlab' in ansible_run_tags"
