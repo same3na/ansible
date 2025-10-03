@@ -1,5 +1,9 @@
 name: workflow-dispatch-playbook-run
 
+permissions:
+  id-token: write
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:
