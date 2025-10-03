@@ -47,7 +47,7 @@ jobs:
           url: https://vault.same3na.com
           role: github-infra-role 
           secrets: |
-            kv/samir cousa | MY_SECRET_ENV_VAR
+            kv/data/samir cousa | MY_SECRET_ENV_VAR
 
       - name: Use secret from Vault
         run: |
