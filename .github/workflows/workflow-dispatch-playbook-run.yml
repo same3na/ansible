@@ -20,6 +20,25 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
+
+      # Step 1: Fetch and inspect OIDC token
+      - name: Debug GitHub OIDC token
+        id: oidc
+        run: |
+          TOKEN=$(curl -s \
+            --header "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL")
+          
+          echo "Raw token: $TOKEN"
+
+          # Decode the JWT payload to inspect claims
+          PAYLOAD=$(echo $TOKEN | cut -d "." -f2 | base64 --decode | jq .)
+          echo "JWT payload:"
+          echo "$PAYLOAD"
+
+          # Set token as output for later steps if needed
+          echo "::set-output name=oidc::$TOKEN"
+
       - name: Retrieve secret from Vault
         uses: hashicorp/vault-action@v2 # Use the latest stable version
         with:
