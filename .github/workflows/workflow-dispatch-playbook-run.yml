@@ -52,8 +52,8 @@ jobs:
 
       - name: Use secret from Vault
         run: |
-          echo "${{ env.PRIVATE_KEY }}" > id_rsa
-          chmod 600 id_rsa
+          eval $(ssh-agent -s)
+          echo "${{ env.PRIVATE_KEY }}" | tr -d '\r' | ssh-add -
 
       - name: Install Ansible
         run: |
