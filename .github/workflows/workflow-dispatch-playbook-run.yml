@@ -55,6 +55,10 @@ jobs:
         with:
           ssh-private-key: ${{ env.PRIVATE_KEY }}
 
+      # - name: Verify SSH Connection
+      #   run: |
+      #     ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
+
       - name: Install Ansible
         run: |
           sudo apt update
