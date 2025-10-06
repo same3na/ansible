@@ -48,8 +48,8 @@ jobs:
           url: https://vault.same3na.com
           role: github-infra-role 
           secrets: |
-            kv/data/same3na/dev/server PRIVATE_KEY | PRIVATE_KEY
-            kv/data/same3na/dev/server DB_PASS | DB_PASS
+            kv/data/same3na/dev/server PRIVATE_KEY | PRIVATE_KEY ;
+            kv/data/same3na/dev/server DB_PASS | DB_PASS ;
 
       - name: Start SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
