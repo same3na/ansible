@@ -51,7 +51,7 @@ jobs:
             kv/data/same3na/dev/server PRIVATE_KEY | PRIVATE_KEY
 
       - name: Start SSH Agent
-        uses: webfactory/ssh-agent@v4
+        uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ env.PRIVATE_KEY }}
 
