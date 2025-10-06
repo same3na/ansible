@@ -2,3 +2,7 @@ base_url: same3na.com
 
 docker_host: "unix:///run/user/{{ ansible_user_uid }}/podman/podman.sock"
 docker_network_name: same3na_same3na-network
+
+db_pass: "{{ lookup('env','DB_PASS') }}"
+
+hashi_vault_token: "{{ lookup('env','VAULT_TOKEN') }}"

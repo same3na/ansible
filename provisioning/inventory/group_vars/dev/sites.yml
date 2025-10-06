@@ -20,7 +20,7 @@ sites:
       DBPORT: "5432"
       DBNAME: "same3na"
       DBUSER: "same3nauser"
-      DBPASS: "{{ vault.db.same3na_password }}"
+      DBPASS: "{{ db_pass }}"
       SSLMODE: "disable"
       ALLOWED_ORIGINS: "*"
       FEATURES_SERVER_URL: "http://features-app-server:8881"
@@ -45,7 +45,7 @@ sites:
     env:
       DBUSER: "same3nauser"
       DBNAME: "same3na"
-      DBPASS: "{{ vault.db.same3na_password }}"
+      DBPASS: "{{ db_pass }}"
       REDIS_HOST: "redis"
       REDIS_PORT: "6379"
       PYTHONPATH: "src"
@@ -61,7 +61,7 @@ sites:
     env:
       DBUSER: "same3nauser"
       DBNAME: "same3na"
-      DBPASS: "{{ vault.db.same3na_password }}"
+      DBPASS: "{{ db_pass }}"
       REDIS_HOST: "redis"
       REDIS_PORT: "6379"
       PYTHONPATH: "src"
@@ -88,4 +88,4 @@ sites:
   #     DB_HOST: "host.containers.internal"
   #     DB_NAME: "same3na"
   #     DB_USER: "same3nauser"
-  #     DB_PASS: "{{ vault.db.same3na_password }}"
+  #     DB_PASS: "{{ db_pass }}"

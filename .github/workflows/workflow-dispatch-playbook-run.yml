@@ -22,7 +22,7 @@ jobs:
 
 
       # # Step 1: Fetch and inspect OIDC token
-      # Important for debuggging OIDC issues
+      # Important for debugging OIDC issues
       # - name: Debug GitHub OIDC token
       #   id: oidc
       #   run: |
@@ -49,6 +49,7 @@ jobs:
           role: github-infra-role 
           secrets: |
             kv/data/same3na/dev/server PRIVATE_KEY | PRIVATE_KEY
+            kv/data/same3na/dev/server DB_PASS | DB_PASS
 
       - name: Start SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
@@ -73,6 +74,9 @@ jobs:
 
       # Run the ansible playbook with the specified tag
       - name: Run Ansible Playbook
+        env:
+          DB_PASSWORD: ${{ env.DB_PASS }}
+          VAULT_TOKEN:  nowaykhosay
         run: |
 
           ansible-playbook -i provisioning/inventory/ provisioning/playbook-dev.yml \

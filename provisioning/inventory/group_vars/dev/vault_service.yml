@@ -1,7 +1,5 @@
 ---
 
-hashi_vault_token: "{{ vault.hashi_vault_token }}"
-
 vault_containers:
   - name: vault
     image: docker.io/vault:1.13.3
