@@ -5,7 +5,7 @@ swager_api_docker_version: release-a1bdb90
 feature_app_docker_version: release-0124594
 feature_app_server_docker_version: release-0124594
 migrate_docker_version: release-a1bdb90
-frontend_docker_version: release-e66d611
+frontend_docker_version: release-aaf03c0
 
 
 sites:
