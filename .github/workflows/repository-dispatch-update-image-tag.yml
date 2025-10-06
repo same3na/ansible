@@ -27,8 +27,8 @@ jobs:
       # Validate inputs
       - name: Validate project_name exists
         run: |
-          if ! grep -q "^${{ github.event.client_payload.project_name }}_docker_version:" provisioning/inventory/group_vars/dev/containers.yml; then
-            echo "Project ${{ github.event.client_payload.project_name }} not found in containers.yml"
+          if ! grep -q "^${{ github.event.client_payload.project_name }}_docker_version:" provisioning/inventory/group_vars/dev/sites.yml; then
+            echo "Project ${{ github.event.client_payload.project_name }} not found in sites.yml"
             exit 1
           fi
 
@@ -43,7 +43,7 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add provisioning/inventory/group_vars/dev/containers.yml
+          git add provisioning/inventory/group_vars/dev/sites.yml
           git commit -m "Update ${{ github.event.client_payload.project_name }} image tag to ${{ github.event.client_payload.image_tag }}" || echo "No changes to commit"
           git push
 
