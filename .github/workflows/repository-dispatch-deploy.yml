@@ -6,6 +6,10 @@
 
 name: repository-dispatch-deploy
 
+permissions:
+  id-token: write
+  contents: read
+  
 on:
   repository_dispatch:
     types: [deploy]
