@@ -24,6 +24,7 @@ runs:
 
       - name: Install Ansible (if cache miss)
         if: steps.cache-ansible.outputs.cache-hit != 'true'
+        shell: bash
         run: |
           python -m venv .venv
           source .venv/bin/activate
@@ -79,16 +80,13 @@ runs:
       #   run: |
       #     ansible-galaxy collection install -r ./requirements.yml
 
-      - name: Create vault password file
-        run: echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > vault_pass.pass
-
       # Run the ansible playbook with the specified tag
       - name: Run Ansible Playbook
         env:
           DB_PASSWORD: ${{ env.DB_PASS }}
           VAULT_TOKEN:  nowaykhosay
+        shell: bash
         run: |
           source .venv/bin/activate
           ansible-playbook -i provisioning/inventory/ provisioning/playbook-dev.yml \
-          --tags "${{ inputs.role_tag }}" \
-          --vault-password-file vault_pass.pass
+          --tags "${{ inputs.role_tag }}"

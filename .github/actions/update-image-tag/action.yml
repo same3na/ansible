@@ -14,6 +14,7 @@ runs:
 
     # Validate inputs
     - name: Validate project_name exists
+      shell: bash
       run: |
         if ! grep -q "^${{ inputs.project_name }}_docker_version:" provisioning/inventory/group_vars/dev/sites.yml; then
           echo "Project ${{ inputs.project_name }} not found in sites.yml"
@@ -22,12 +23,14 @@ runs:
 
     # Update the image tag in the YAML file
     - name: Update image tag
+      shell: bash
       run: |
         echo "Updating project ${{ inputs.project_name }} to tag ${{ inputs.image_tag }}"
         sed -i "s|^${{ inputs.project_name }}_docker_version:.*|${{ inputs.project_name }}_docker_version: ${{ inputs.image_tag }}|" provisioning/inventory/group_vars/dev/sites.yml
 
     # Commit & push changes
     - name: Commit changes
+      shell: bash
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
