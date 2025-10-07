@@ -17,7 +17,8 @@ jobs:
       # Checkout the infra repo itself
       - name: Checkout Repo
         uses: actions/checkout@v4
-
+        with:
+          token: ${{ secrets.PAT }}
 
       - name: Dispatch update-image-tag event
         uses: ./.github/actions/update-image-tag
@@ -35,8 +36,6 @@ jobs:
         # Checkout the infra repo itself
       - name: Checkout Repo
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.PAT }}
 
       - name: Dispatch playbook-run event
         uses: ./.github/actions/run-playbook
