@@ -1,27 +1,13 @@
-# Workflow: playbook-run
-# Trigger: repository_dispatch with type 'playbook-run'
-# Required inputs in client_payload:
-#   - role_tag: tag of the role to run
+name: 'Update Image Tag'
+description: 'Dispatches update-image-tag event to ansible repo'
+inputs:
+  role_tag:
+    description: 'The playbook tag to run'
+    required: true
 
-
-name: repository-dispatch-playbook-run
-
-permissions:
-  id-token: write
-  contents: read
-
-on:
-  repository_dispatch:
-    types: [playbook-run]
-
-concurrency:
-  group: "playbook-run"
-  cancel-in-progress: false
-
-jobs:
-  run-playbook:
-    runs-on: ubuntu-latest
-    steps:
+runs:
+  using: 'composite'
+  steps:
       # Checkout the infra repo itself
       - name: Checkout Repo
         uses: actions/checkout@v4
@@ -48,6 +34,25 @@ jobs:
           pip install ansible
           ansible-galaxy collection install -r requirements.yml
 
+      # # Step 1: Fetch and inspect OIDC token
+      # Important for debugging OIDC issues
+      # - name: Debug GitHub OIDC token
+      #   id: oidc
+      #   run: |
+      #     TOKEN=$(curl -s \
+      #       --header "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+      #       "$ACTIONS_ID_TOKEN_REQUEST_URL")
+          
+      #     echo "Raw token: $TOKEN"
+
+      #     # Decode the JWT payload to inspect claims
+      #     PAYLOAD=$(echo $TOKEN | cut -d "." -f2 | base64 --decode | jq .)
+      #     echo "JWT payload:"
+      #     echo "$PAYLOAD"
+
+      #     # Set token as output for later steps if needed
+      #     echo "::set-output name=oidc::$TOKEN"
+
       - name: Retrieve secret from Vault
         uses: hashicorp/vault-action@v2 # Use the latest stable version
         with:
@@ -68,6 +73,15 @@ jobs:
       #   run: |
       #     ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
 
+      # - name: Install Ansible
+      #   run: |
+      #     sudo apt update
+      #     sudo apt install -y ansible
+
+      # - name: Install dependencies
+      #   run: |
+      #     ansible-galaxy collection install -r ./requirements.yml
+
       - name: Create vault password file
         run: echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > vault_pass.pass
 
@@ -79,5 +93,5 @@ jobs:
         run: |
           source .venv/bin/activate
           ansible-playbook -i provisioning/inventory/ provisioning/playbook-dev.yml \
-          --tags "${{ github.event.inputs.role_tag }}" \
+          --tags "${{ inputs.role_tag }}" \
           --vault-password-file vault_pass.pass

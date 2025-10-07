@@ -1,0 +1,33 @@
+# Workflow: deploy
+# Trigger: repository_dispatch with type 'deploy'
+# Required inputs in client_payload:
+#   - project_name: name of the project in containers.yml
+#   - image_tag: new docker image tag to set
+
+name: repository-dispatch-deploy
+
+on:
+  repository_dispatch:
+    types: [deploy]
+
+jobs:
+  update_image_tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch update-image-tag event
+        uses: ./.github/actions/update-image-tag
+        with:
+          project_name: ${{ github.event.client_payload.project_name }}
+          image_tag: ${{ github.event.client_payload.image_tag }}
+
+  run_playbook:
+    needs: update_image_tag
+    runs-on: ubuntu-latest
+    concurrency:
+      group: deploy-sites
+      cancel-in-progress: true
+    steps:
+      - name: Dispatch playbook-run event
+        uses: ./.github/actions/run-playbook
+        with:
+          role_tag: sites

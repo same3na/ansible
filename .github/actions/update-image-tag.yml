@@ -1,0 +1,40 @@
+name: 'Update Image Tag'
+description: 'Dispatches update-image-tag event to ansible repo'
+inputs:
+  project_name:
+    description: 'Project name'
+    required: true
+  image_tag:
+    description: 'Docker image tag'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    # Checkout the infra repo itself
+    - name: Checkout Repo
+      uses: actions/checkout@v4
+
+    # Validate inputs
+    - name: Validate project_name exists
+      run: |
+        if ! grep -q "^${{ inputs.project_name }}_docker_version:" provisioning/inventory/group_vars/dev/sites.yml; then
+          echo "Project ${{ inputs.project_name }} not found in sites.yml"
+          exit 1
+        fi
+
+    # Update the image tag in the YAML file
+    - name: Update image tag
+      run: |
+        echo "Updating project ${{ inputs.project_name }} to tag ${{ inputs.image_tag }}"
+        sed -i "s|^${{ inputs.project_name }}_docker_version:.*|${{ inputs.project_name }}_docker_version: ${{ inputs.image_tag }}|" provisioning/inventory/group_vars/dev/sites.yml
+
+    # Commit & push changes
+    - name: Commit changes
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add provisioning/inventory/group_vars/dev/sites.yml
+        git commit -m "Update ${{ inputs.project_name }} image tag to ${{ inputs.image_tag }}" || echo "No changes to commit"
+        git push
+
