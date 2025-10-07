@@ -16,6 +16,10 @@ jobs:
   run-playbook:
     runs-on: ubuntu-latest
     steps:
+      # Checkout the infra repo itself
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
       - name: Dispatch playbook-run event
         uses: ./.github/actions/run-playbook
         with:
