@@ -8,9 +8,6 @@ inputs:
 runs:
   using: 'composite'
   steps:
-      # Checkout the infra repo itself
-      - name: Checkout Repo
-        uses: actions/checkout@v4
 
       # set up python to install ansible
       - name: Set up Python

@@ -14,6 +14,10 @@ jobs:
   update_image_tag:
     runs-on: ubuntu-latest
     steps:
+      # Checkout the infra repo itself
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
       - name: Dispatch update-image-tag event
         uses: ./.github/actions/update-image-tag
         with:
@@ -27,6 +31,10 @@ jobs:
       group: deploy-sites
       cancel-in-progress: true
     steps:
+        # Checkout the infra repo itself
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
       - name: Dispatch playbook-run event
         uses: ./.github/actions/run-playbook
         with:

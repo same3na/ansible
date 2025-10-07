@@ -11,9 +11,6 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    # Checkout the infra repo itself
-    - name: Checkout Repo
-      uses: actions/checkout@v4
 
     # Validate inputs
     - name: Validate project_name exists
