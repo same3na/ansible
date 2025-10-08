@@ -3,7 +3,7 @@
 backend_docker_version: release-a1bdb90
 swager_api_docker_version: release-a1bdb90
 feature_app_docker_version: release-99d28f7
-feature_app_server_docker_version: release-99d28f7
+feature_app_server_docker_version: release-c5395e5
 migrate_docker_version: release-a1bdb90
 frontend_docker_version: release-d10db20
 
